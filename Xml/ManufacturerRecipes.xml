@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ArrayOfCraftData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <CraftData>
+    <Key>Innominate.TunnelBore</Key>
+    <Category>mining</Category>
+    <Tier>2</Tier>
+    <CraftedKey>Innominate.TunnelBore</CraftedKey>
+    <CraftedAmount>1</CraftedAmount>
+    <Description>Automatically digs a V shaped tunnel starting at 5 blocks wide, and increasing 2 blocks in width per level to a maximum distance of 64 blocks.</Description>
+    <Hint>Great for digging Cryoplasm assault tunnels.</Hint>
+    <Costs>
+      <CraftCost>
+        <Key>AlloyedMachineBlock</Key>
+        <Amount>10</Amount>
+      </CraftCost>
+    </Costs>
+  </CraftData>
+  <CraftData>
+    <Key>Innominate.TunnelBoreSquare</Key>
+    <Category>mining</Category>
+    <Tier>2</Tier>
+    <CraftedKey>Innominate.TunnelBoreSquare</CraftedKey>
+    <CraftedAmount>1</CraftedAmount>
+    <Description>Automatically digs a square tunnel, 3x3 in size to a maximum distance of 64 blocks.</Description>
+    <Hint>Great for digging a channel for Dazzler Turrets to attack melted cryoplasm.</Hint>
+    <Costs>
+      <CraftCost>
+        <Key>AlloyedMachineBlock</Key>
+        <Amount>10</Amount>
+      </CraftCost>
+    </Costs>
+  </CraftData>
+</ArrayOfCraftData>

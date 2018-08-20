@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ArrayOfTerrainDataEntry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                         xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TerrainDataEntry>
+    <Key>Innominate.BoringCompany</Key>
+    <Name>Tunnel Bore</Name>
+    <Values>
+      <ValueEntry>
+        <Key>Innominate.TunnelBore</Key>
+        <Name>Tunnel Bore (Stair Cut)</Name>
+        <Description>Cuts a tunnel with stair step sides 10 high and starting 5 wide.</Description>
+        <IconName>Innominate.TunnelBoreV</IconName>
+      </ValueEntry>
+      <ValueEntry>
+        <Key>Innominate.TunnelBoreSquare</Key>
+        <Name>Tunnel Bore (Square Cut)</Name>
+        <Description>Cuts a tunnel with square sides 3 high and 3 wide.</Description>
+        <IconName>Innominate.TunnelBoreSquare</IconName>
+      </ValueEntry>
+    </Values>
+    <Description>Excavates a V shaped tunnel starting at 5 blocks wide, and ending 10 blocks high.</Description>
+    <LayerType>PrimaryTerrain</LayerType>
+    <TopTexture>192</TopTexture>
+    <SideTexture>192</SideTexture>
+    <BottomTexture>192</BottomTexture>
+    <GUITexture>192</GUITexture>
+    <isSolid>false</isSolid>
+    <isTransparent>true</isTransparent>
+    <isHollow>false</isHollow>
+    <isGlass>false</isGlass>
+    <isPassable>true</isPassable>
+    <hasObject>true</hasObject>
+    <hasEntity>true</hasEntity>
+    <Category>Machine</Category>
+    <AudioWalkType>Metal</AudioWalkType>
+    <AudioBuildType>Dirt</AudioBuildType>
+    <AudioDestroyType>None</AudioDestroyType>
+    <tags>
+      <tag>Machinery</tag>
+    </tags>
+  </TerrainDataEntry>
+</ArrayOfTerrainDataEntry>
