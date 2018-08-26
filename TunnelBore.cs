@@ -1,5 +1,9 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace TunnelBore
 {
@@ -16,7 +20,7 @@ namespace TunnelBore
         private float CurrentPower;
 
         public static float PowerPerBlock { get; set; } = 10;
-        public static int MaxBoreDistance = 64;
+        public static int MaxBoreDistance = 256;
 
         public TunnelBore(long x, long y, long z, ushort cube, byte flags, ushort value, Vector3 position,
             Segment segment) : base(eSegmentEntity.Mod, SpawnableObjectEnum.BFL9000, x, y, z, cube, flags,
@@ -25,7 +29,7 @@ namespace TunnelBore
             mbNeedsLowFrequencyUpdate = true;
             this.mFlags = flags;
             ResetRotation();
-            State = BoreState.LowPower;
+            State = BoreState.Initializing;
             FlavorText = _flavorTexts[Random.Range(0, _flavorTexts.Length)];
         }
 
@@ -52,7 +56,42 @@ namespace TunnelBore
             ResetRotation();
         }
 
-        public void BoreTunnelV()
+        public void WithSegments(Action<HashSet<Segment>> action)
+        {
+            var touchedSegments = new HashSet<Segment>();
+            try
+            {
+                action(touchedSegments);
+            }
+            finally
+            {
+                foreach (var seg in touchedSegments)
+                {
+                    seg.EndProcessing();
+                }
+            }
+        }
+
+        public override bool ShouldNetworkUpdate()
+        {
+            return true;
+        }
+
+        public override void ReadNetworkUpdate(BinaryReader reader)
+        {
+            State = (BoreState) reader.ReadInt32();
+            BoreDistance = reader.ReadInt32();
+            MaxBoreDistance = reader.ReadInt32();
+        }
+
+        public override void WriteNetworkUpdate(BinaryWriter writer)
+        {
+            writer.Write((int)State);
+            writer.Write(BoreDistance);
+            writer.Write(MaxBoreDistance);
+        }
+
+        public void BoreTunnelV(HashSet<Segment> touchedSegments)
         {
             for (var layer = 0; layer < 10; layer++)
             {
@@ -106,18 +145,22 @@ namespace TunnelBore
                         return;
                     }
 
-                    if (WorldScript.mbIsServer)
+                    if (!touchedSegments.Contains(segment))
                     {
-                        CurrentPower -= PowerPerBlock;
-                        WorldScript.instance.BuildFromEntity(segment, posX, posY, posZ, eCubeTypes.Air, 0);
+                        segment.BeginProcessing();
+                        touchedSegments.Add(segment);
                     }
+
+
+                    CurrentPower -= PowerPerBlock;
+                    WorldScript.instance.BuildFromEntity(segment, posX, posY, posZ, eCubeTypes.Air, 0);
                 }
             }
 
             BoreDistance++;
         }
 
-        public void BoreTunnelSquare()
+        public void BoreTunnelSquare(HashSet<Segment> touchedSegments)
         {
             for (var layer = 0; layer < 3; layer++)
             {
@@ -165,17 +208,19 @@ namespace TunnelBore
                     var cube = segment.GetCube(posX, posY, posZ);
                     if (!CubeHelper.IsGarbage(cube))
                         continue;
-
                     if (CurrentPower - PowerPerBlock < 0)
                     {
                         return;
                     }
 
-                    if (WorldScript.mbIsServer)
+                    if (!touchedSegments.Contains(segment))
                     {
-                        CurrentPower -= PowerPerBlock;
-                        WorldScript.instance.BuildFromEntity(segment, posX, posY, posZ, eCubeTypes.Air, 0);
+                        segment.BeginProcessing();
+                        touchedSegments.Add(segment);
                     }
+
+                    CurrentPower -= PowerPerBlock;
+                    WorldScript.instance.BuildFromEntity(segment, posX, posY, posZ, eCubeTypes.Air, 0);
                 }
             }
 
@@ -184,7 +229,14 @@ namespace TunnelBore
 
         public override void LowFrequencyUpdate()
         {
+            // If we're a network client, we don't need to process anything
+            if (!WorldScript.mbIsServer)
+                return;
+
             base.LowFrequencyUpdate();
+
+            if (State == BoreState.Initializing)
+                State = BoreState.LowPower;
 
             if (BoreDistance > MaxBoreDistance)
             {
@@ -196,6 +248,7 @@ namespace TunnelBore
             if (State == BoreState.LowPower)
                 return;
 
+            // We're going to sleep this many ticks between dig attempts
             SleepCount++;
             if (SleepCount < 4)
                 return;
@@ -204,10 +257,10 @@ namespace TunnelBore
             switch (mValue)
             {
                 case 0:
-                    BoreTunnelV();
+                    WithSegments(BoreTunnelV);
                     break;
                 case 1:
-                    BoreTunnelSquare();
+                    WithSegments(BoreTunnelSquare);
                     break;
             }
         }
@@ -278,7 +331,6 @@ namespace TunnelBore
             // Because lulz
             builder.AppendLine("");
             builder.AppendLine(FlavorText);
-
             return builder.ToString();
         }
 
@@ -288,11 +340,13 @@ namespace TunnelBore
             "Are you bored yet?",
             "Un-bore-lievable.",
             "These puns are un-bore-able.",
-            "If you are bored, put on a cape, then you can be Super Bored!"
+            "If you are bored, put on a cape, then you can be Super Bored!",
+            "Boring, no matter the direction.",
         };
 
         public enum BoreState
         {
+            Initializing,
             LowPower,
             Boring,
             Finished,
